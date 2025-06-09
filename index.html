@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Content Time Tracker Worksheet</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <style>
+    :root {
+      --light-purple: #F5EDFF;
+      --lighter-purple: #F8F3FF;
+      --medium-purple: #A271F8;
+      --border-color: #d6c5ee;
+      --input-bg: #fffefe;
+      --input-border: #cebbeb;
+      --text-color: #32235b;
+      --row-hover: #f2ebfa;
+    }
+
+    body {
+      background: var(--lighter-purple);
+      font-family: 'Segoe UI', Arial, sans-serif;
+      color: var(--text-color);
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 95vw;
+      width: 1200px;
+      margin: 32px auto 32px auto;
+      background: var(--light-purple);
+      border-radius: 12px;
+      box-shadow: 0 4px 24px #e1d6fc66;
+      padding: 32px 24px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      letter-spacing: 1.4px;
+      font-size: 2rem;
+      color: var(--medium-purple);
+    }
+
+    .time-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 1rem;
+      background: var(--light-purple);
+    }
+
+    .time-table thead th {
+      background: var(--medium-purple);
+      color: #fff;
+      padding: 10px 6px;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    .time-table tbody tr {
+      background: var(--light-purple);
+      transition: background 0.2s;
+    }
+
+    .time-table tbody tr:hover {
+      background: var(--row-hover);
+    }
+
+    .time-table td,
+    .time-table th {
+      border: 1px solid var(--border-color);
+      padding: 8px 5px;
+      text-align: center;
+    }
+
+    .task-checkbox-group {
+      display: flex;
+      justify-content: center;
+      gap: 7px;
+    }
+
+    .task-checkbox-group label {
+      display: flex;
+      align-items: center;
+      font-weight: normal;
+      font-size: 0.98em;
+      gap: 2px;
+    }
+
+    select,
+    input[type="date"],
+    input[type="time"],
+    input[type="number"],
+    input[type="text"],
+    textarea {
+      font-family: inherit;
+      border: 1.5px solid var(--input-border);
+      border-radius: 5px;
+      padding: 5px 7px;
+      background: var(--input-bg);
+      color: var(--text-color);
+      font-size: 1em;
+      width: 100%;
+      box-sizing: border-box;
+      transition: border-color 0.18s;
+    }
+
+    input[type="number"].breaks {
+      width: 55px;
+      min-width: 40px;
+      text-align: right;
+    }
+
+    input[readonly] {
+      background: #ede2ff;
+      color: #8571a3;
+      border-color: #cac0e1;
+      cursor: not-allowed;
+    }
+
+    textarea {
+      min-width: 130px;
+      min-height: 38px;
+      width: 180px;
+      height: 41px;
+      resize: vertical;
+      font-size: 1em;
+      padding: 5px 7px;
+      white-space: pre-line;
+      word-break: break-word;
+      font-family: inherit;
+    }
+
+    .medium-purple-btn {
+      background: var(--medium-purple);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 12px 22px;
+      font-size: 1.07em;
+      margin: 20px 7px 0 0;
+      cursor: pointer;
+      box-shadow: 0 2px 8px #dacbf866;
+      transition: background 0.16s, color 0.16s;
+      letter-spacing: 1.2px;
+      font-weight: 500;
+    }
+
+    .medium-purple-btn:hover,
+    .medium-purple-btn:focus {
+      background: #7c48d1;
+      color: #fffbe7;
+      outline: none;
+    }
+
+    .totals-section {
+      max-width: 640px;
+      margin: 35px auto 10px auto;
+      background: #f9f5fd;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px #d6cffa33;
+      padding: 24px 18px 10px 18px;
+      font-size: 1.09em;
+      color: var(--medium-purple);
+    }
+
+    .totals-section h3 {
+      color: var(--medium-purple);
+      font-size: 1.2em;
+      margin-bottom: 12px;
+      margin-top: 0;
+      text-align: left;
+    }
+
+    .totals-table {
+      width: 100%;
+      margin-bottom: 16px;
+    }
+
+    .totals-table td {
+      padding: 4px 7px;
+      font-weight: 500;
+    }
+
+    .totals-table tr:not(:last-child) td {
+      border-bottom: 1px solid #ece0f2;
+    }
+
+    .bottom-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+      margin: 28px auto 14px auto;
+    }
+
+    @media (max-width: 900px) {
+      .container {
+        width: 99vw;
+        padding: 6vw 1vw;
+      }
+
+      .totals-section {
+        width: 99vw;
+        max-width: 97vw;
+      }
+
+      .time-table th,
+      .time-table td {
+        font-size: 0.98em;
+      }
+
+      textarea {
+        min-width: 62px;
+        width: 92px;
+      }
+    }
+
+    @media (max-width:550px) {
+      .container {
+        padding: 2vw 2vw;
+      }
+
+      .time-table,
+      .totals-section {
+        font-size: 0.92em;
+      }
+
+      textarea {
+        min-width: 36px;
+        width: 74px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Content Time Tracker Worksheet</h1>
+    <form id="trackerForm" autocomplete="off">
+      <table class="time-table" id="trackerTable">
+        <thead>
+          <tr>
+            <th>DATE</th>
+            <th>TASK<br><span style="font-weight:400;font-size:.93em;">(Craft/Caption/Schedule)</span></th>
+            <th>TYPE <br><span style="font-weight:400;font-size:.93em;">(Image/Carousel/Reel)</span></th>
+            <th>START TIME</th>
+            <th>END TIME</th>
+            <th>BREAKS<br><span style="font-weight:400;font-size:.93em;">(min)</span></th>
+            <th>DURATION</th>
+            <th>NOTES</th>
+          </tr>
+        </thead>
+        <tbody id="trackerTableBody">
+          <!-- Rows inserted by JS -->
+        </tbody>
+      </table>
+      <div style="text-align:center;">
+        <button type="button" class="medium-purple-btn" id="addRowsBtn">Add more rows</button>
+      </div>
+    </form>
+    <div class="totals-section" id="totalsSection">
+      <h3>Total Duration</h3>
+      <table class="totals-table">
+        <tbody>
+          <tr>
+            <td>Total Time (Images):</td>
+            <td id="totalImage">0m</td>
+          </tr>
+          <tr>
+            <td>Total Time (Carousels):</td>
+            <td id="totalCarousel">0m</td>
+          </tr>
+          <tr>
+            <td>Total Time (Reels):</td>
+            <td id="totalReel">0m</td>
+          </tr>
+          <tr>
+            <td style="font-weight:700;color:#5b3ead;">Total (All Tasks):</td>
+            <td id="totalAll" style="font-weight:700;color:#5b3ead;">0m</td>
+          </tr>
+          <tr>
+            <td>Average Time Per Image</td>
+            <td id="avgImage">0m</td>
+          </tr>
+          <tr>
+            <td>Average Time Per Carousel</td>
+            <td id="avgCarousel">0m</td>
+          </tr>
+          <tr>
+            <td>Average Time Per Reel</td>
+            <td id="avgReel">0m</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="bottom-actions">
+      <button type="button" class="medium-purple-btn" id="printBtn">Print</button>
+      <button type="button" class="medium-purple-btn" id="saveBtn">Save To Device</button>
+    </div>
+  </div>
+  <script>
+    const STARTING_ROWS = 20;
+    const ROWS_TO_ADD = 5;
+    const types = ['Image', 'Carousel', 'Reel'];
+
+    // Generates a table row with all form elements, unique ids for each row.
+    function createTableRow(rowIdx) {
+      return `<tr>
+    <td>
+      <input type="date" name="date_${rowIdx}" required>
+    </td>
+    <td>
+      <div class="task-checkbox-group">
+        <label><input type="checkbox" name="crafting_${rowIdx}"> Crafting</label>
+        <label><input type="checkbox" name="captioning_${rowIdx}"> Captioning</label>
+        <label><input type="checkbox" name="scheduling_${rowIdx}"> Scheduling</label>
+      </div>
+    </td>
+    <td>
+      <select name="type_${rowIdx}">
+        <option value="Image">Image</option>
+        <option value="Carousel">Carousel</option>
+        <option value="Reel">Reel</option>
+      </select>
+    </td>
+    <td>
+      <input type="time" name="start_${rowIdx}">
+    </td>
+    <td>
+      <input type="time" name="end_${rowIdx}">
+    </td>
+    <td>
+      <input type="number" name="break_${rowIdx}" class="breaks" min="0" step="1" placeholder="0">
+    </td>
+    <td>
+      <input type="text" name="duration_${rowIdx}" readonly tabindex="-1">
+    </td>
+    <td>
+      <textarea name="notes_${rowIdx}" wrap="soft" maxlength="250"></textarea>
+    </td>
+  </tr>`;
+    }
+
+    // Adds n rows to the table body
+    function addRows(n) {
+      const body = document.getElementById('trackerTableBody');
+      const currentRows = body.rows.length;
+      let html = '';
+      for (let i = currentRows; i < currentRows + n; ++i) {
+        html += createTableRow(i);
+      }
+      body.insertAdjacentHTML('beforeend', html);
+    }
+    addRows(STARTING_ROWS);
+
+    // Helper: Parse time in HH:MM to minutes since midnight
+    function parseTimeInput(timeStr) {
+      if (!timeStr) return null;
+      const parts = timeStr.split(':');
+      if (parts.length < 2) return null;
+      let h = parseInt(parts[0], 10), m = parseInt(parts[1], 10);
+      if (isNaN(h) || isNaN(m)) return null;
+      return h * 60 + m;
+    }
+
+    // Helper: Format duration minutes to "Hh Mm" or "Xm"
+    function formatDuration(minutes) {
+      if (minutes == null || isNaN(minutes) || minutes <= 0) return '';
+      let h = Math.floor(minutes / 60), m = minutes % 60;
+      let str = (h ? `${h}h ` : '') + (m ? `${m}m` : (h ? '' : '0m'));
+      return str.trim();
+    }
+
+    // Calculates and updates DURATION for a row (and returns minutes or null)
+    function updateRowDuration(rowIdx) {
+      const start = document.querySelector(`[name="start_${rowIdx}"]`).value;
+      const end = document.querySelector(`[name="end_${rowIdx}"]`).value;
+      const breaks = Number(document.querySelector(`[name="break_${rowIdx}"]`).value) || 0;
+      const durationInput = document.querySelector(`[name="duration_${rowIdx}"]`);
+      let durationMin = null;
+      if (start && end) {
+        const t1 = parseTimeInput(start);
+        const t2 = parseTimeInput(end);
+        if (t1 != null && t2 != null) {
+          let mins = t2 - t1 - breaks;
+          if (mins < 0) mins += 1440; // handle overnight work (if applicable)
+          if (mins < 0) mins = 0;
+          durationMin = mins;
+          durationInput.value = formatDuration(mins);
+        } else {
+          durationInput.value = '';
+        }
+      } else {
+        durationInput.value = '';
+      }
+      return durationMin;
+    }
+
+    // Attach input listeners for all rows; handle new rows after added
+    function attachListeners() {
+      const body = document.getElementById('trackerTableBody');
+      Array.from(body.rows).forEach((row, idx) => {
+        ['start', 'end', 'break'].forEach(field => {
+          const input = row.querySelector(`[name="${field}_${idx}"]`);
+          if (input) {
+            input.oninput = () => {
+              updateRowDuration(idx);
+              updateTotals();
+            }
+          }
+        });
+        const select = row.querySelector(`[name="type_${idx}"]`);
+        if (select) {
+          select.onchange = updateTotals;
+        }
+      });
+      updateTotals();
+    }
+    attachListeners();
+
+    // When rows are added later
+    document.getElementById('addRowsBtn').onclick = function () {
+      addRows(ROWS_TO_ADD);
+      setTimeout(attachListeners, 60);
+    }
+
+    // Totals and Averages
+    function updateTotals() {
+      let totals = { Image: 0, Carousel: 0, Reel: 0, _counts: { Image: 0, Carousel: 0, Reel: 0 }, All: 0 };
+      const body = document.getElementById('trackerTableBody');
+      Array.from(body.rows).forEach((row, idx) => {
+        const type = row.querySelector(`[name="type_${idx}"]`)?.value || 'Image';
+        const duration = updateRowDuration(idx);
+        if (duration && ['Image', 'Carousel', 'Reel'].includes(type)) {
+          totals[type] = (totals[type] || 0) + duration;
+          totals._counts[type] = (totals._counts[type] || 0) + 1;
+          totals.All += duration;
+        }
+      });
+      document.getElementById('totalImage').textContent = formatDuration(totals.Image);
+      document.getElementById('totalCarousel').textContent = formatDuration(totals.Carousel);
+      document.getElementById('totalReel').textContent = formatDuration(totals.Reel);
+      document.getElementById('totalAll').textContent = formatDuration(totals.All);
+
+      document.getElementById('avgImage').textContent =
+        totals._counts.Image ? formatDuration(Math.round(totals.Image / totals._counts.Image)) : '0m';
+      document.getElementById('avgCarousel').textContent =
+        totals._counts.Carousel ? formatDuration(Math.round(totals.Carousel / totals._counts.Carousel)) : '0m';
+      document.getElementById('avgReel').textContent =
+        totals._counts.Reel ? formatDuration(Math.round(totals.Reel / totals._counts.Reel)) : '0m';
+    }
+    document.getElementById('trackerForm').oninput = updateTotals;
+
+    // Print functionality
+    document.getElementById('printBtn').onclick = function () {
+      window.print();
+    }
+
+    // Save to Device (as CSV)
+    document.getElementById('saveBtn').onclick = function () {
+      // Headers
+      const csv = [];
+      csv.push([
+        'DATE', 'CRAFTING', 'CAPTIONING', 'SCHEDULING', 'TYPE', 'START', 'END', 'BREAKS (min)', 'DURATION (mins)', 'NOTES'
+      ]);
+      const body = document.getElementById('trackerTableBody');
+      Array.from(body.rows).forEach((row, idx) => {
+        const date = row.querySelector(`[name="date_${idx}"]`)?.value || '';
+        const crafting = row.querySelector(`[name="crafting_${idx}"]`)?.checked ? 'Yes' : '';
+        const captioning = row.querySelector(`[name="captioning_${idx}"]`)?.checked ? 'Yes' : '';
+        const scheduling = row.querySelector(`[name="scheduling_${idx}"]`)?.checked ? 'Yes' : '';
+        const type = row.querySelector(`[name="type_${idx}"]`)?.value || '';
+        const start = row.querySelector(`[name="start_${idx}"]`)?.value || '';
+        const end = row.querySelector(`[name="end_${idx}"]`)?.value || '';
+        const breaks = row.querySelector(`[name="break_${idx}"]`)?.value || '';
+        const durationText = row.querySelector(`[name="duration_${idx}"]`)?.value || '';
+        let notes = row.querySelector(`[name="notes_${idx}"]`)?.value || '';
+        notes = notes.replace(/"/g, '""');
+        // Parse duration string to minutes
+        let mins = 0;
+        if (durationText.includes('h')) {
+          const [hPart, mPart = ''] = durationText.split('h');
+          mins = parseInt(hPart) * 60 + parseInt(mPart.replace('m', '').trim()) || 0;
+        } else if (durationText.endsWith('m')) {
+          mins = parseInt(durationText.replace('m', '').trim()) || 0;
+        }
+        csv.push([
+          date, crafting, captioning, scheduling, type, start, end, breaks, mins, `"${notes}"`
+        ]);
+      });
+      // Download as CSV file
+      let csvContent = csv.map(row => row.join(',')).join('\r\n');
+      let blob = new Blob([csvContent], { type: "text/csv" });
+      let link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.download = "content-time-tracker.csv";
+      link.click();
+    };
+
+    // Redo durations after adding rows (sometimes DOM needs a tick)
+    setTimeout(updateTotals, 170);
+  </script>
+</body>
+
+</html>
