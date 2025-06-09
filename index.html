@@ -5,7 +5,6 @@
   <meta charset="UTF-8">
   <title>Content Time Tracker Worksheet</title>
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <!-- SheetJS for Excel Export (.xlsx) -->
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
   <style>
     :root {
@@ -313,8 +312,7 @@
             <th>NOTES</th>
           </tr>
         </thead>
-        <tbody id="trackerTableBody">
-        </tbody>
+        <tbody id="trackerTableBody"></tbody>
       </table>
       <div style="text-align:center;">
         <button type="button" class="medium-purple-btn" id="addRowsBtn">Add more rows</button>
@@ -374,7 +372,7 @@
     const types = ['Select One', 'Image', 'Carousel', 'Reel'];
 
     function createTableRow(rowIdx, data) {
-      const checked = (val) => val ? "checked" : "";
+      const checked = val => val ? "checked" : "";
       let typeOpts = types.map(opt =>
         `<option value="${opt}" ${data && data.type === opt ? "selected" : ""}>${opt}</option>`
       ).join('');
@@ -597,7 +595,7 @@
 
     document.getElementById('addRowsBtn').onclick = function () {
       addRows(ROWS_TO_ADD);
-      setTimeout(attachListeners, 60); // ensures new rows receive listeners
+      setTimeout(attachListeners, 60);
       setTimeout(saveToLocal, 120);
     }
 
@@ -615,6 +613,47 @@
         setTimeout(updateTotals, 150);
       }
     };
+
+    document.getElementById('exportBtn').onclick = function () {
+      const ws_data = [];
+      ws_data.push([
+        'DATE', 'CRAFTING', 'CAPTIONING', 'SCHEDULING', 'TYPE', 'START', 'END', 'BREAKS (min)', 'DURATION', 'NOTES'
+      ]);
+      const body = document.getElementById('trackerTableBody');
+      Array.from(body.rows).forEach((row, idx) => {
+        const date = row.querySelector(`[name="date_${idx}"]`)?.value || '';
+        const crafting = row.querySelector(`[name="crafting_${idx}"]`)?.checked ? 'Yes' : '';
+        const captioning = row.querySelector(`[name="captioning_${idx}"]`)?.checked ? 'Yes' : '';
+        const scheduling = row.querySelector(`[name="scheduling_${idx}"]`)?.checked ? 'Yes' : '';
+        const type = row.querySelector(`[name="type_${idx}"]`)?.value || '';
+        const start = row.querySelector(`[name="start_${idx}"]`)?.value || '';
+        const end = row.querySelector(`[name="end_${idx}"]`)?.value || '';
+        const breaks = row.querySelector(`[name="break_${idx}"]`)?.value || '';
+        const duration = row.querySelector(`[name="duration_${idx}"]`)?.value || '';
+        let notes = row.querySelector(`[name="notes_${idx}"]`)?.value || '';
+        ws_data.push([date, crafting, captioning, scheduling, type, start, end, breaks, duration, notes]);
+      });
+      ws_data.push([]);
+      ws_data.push(['SUMMARY']);
+      let totals = window._currentTotalsForExport || {};
+      const fd = (val) => (val ? formatDuration(val) : '0m');
+      ws_data.push(['Total (Images):', fd(totals.totalImage)]);
+      ws_data.push(['Total (Carousels):', fd(totals.totalCarousel)]);
+      ws_data.push(['Total (Reels):', fd(totals.totalReel)]);
+      ws_data.push(['Total (All Tasks):', fd(totals.totalAll)]);
+      ws_data.push(['Average (Image):', fd(totals.avgImage)]);
+      ws_data.push(['Average (Carousel):', fd(totals.avgCarousel)]);
+      ws_data.push(['Average (Reel):', fd(totals.avgReel)]);
+      ws_data.push(['Crafting %:', (totals.taskPercents?.crafting ?? 0) + '%']);
+      ws_data.push(['Captioning %:', (totals.taskPercents?.captioning ?? 0) + '%']);
+      ws_data.push(['Scheduling %:', (totals.taskPercents?.scheduling ?? 0) + '%']);
+
+      let ws = XLSX.utils.aoa_to_sheet(ws_data);
+      let wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Worksheet");
+      XLSX.writeFile(wb, "content-time-tracker.xlsx");
+    };
+
     initTable();
     setTimeout(updateTotals, 170);
   </script>
